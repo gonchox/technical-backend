@@ -93,6 +93,16 @@ public class OrderController {
         return convertToResource(orderService.deleteProduct(orderId, productId, quantity));
     }
 
+    @Operation(summary = "Update quantity of a product in an order")
+    @PutMapping("/orders/{orderId}/products/{productId}/{quantity}")
+    public OrderResource updateOrderProductQuantity(
+            @PathVariable(name = "orderId") Long orderId,
+            @PathVariable(name = "productId") Long productId,
+            @PathVariable(name = "quantity") int quantity) {
+
+        return convertToResource(orderService.updateProductQuantity(orderId, productId, quantity));
+    }
+
     // Auto Mapper
     private Order convertToEntity(SaveOrderResource resource) {
         return mapper.map(resource, Order.class);

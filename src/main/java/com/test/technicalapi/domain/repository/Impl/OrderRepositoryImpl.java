@@ -3,6 +3,7 @@ package com.test.technicalapi.domain.repository.Impl;
 import com.test.technicalapi.domain.model.Order;
 import com.test.technicalapi.domain.model.Product;
 import com.test.technicalapi.domain.repository.OrderRepository;
+import com.test.technicalapi.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -61,14 +62,14 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Transactional
     public Order addProduct(Long orderId, Long productId, int quantity) {
         // Check if the product already exists in the order
-        String checkExistenceSql = "SELECT 1 FROM order_product WHERE order_id = ? AND product_id = ?";
-        Boolean productExists = jdbcTemplate.query(checkExistenceSql, new Object[]{orderId, productId},
-                (rs, rowNum) -> true).stream().findFirst().orElse(false);
+        String checkExistenceSql = "SELECT quantity FROM order_product WHERE order_id = ? AND product_id = ?";
+        Integer existingQuantity = jdbcTemplate.query(checkExistenceSql, new Object[]{orderId, productId},
+                (rs, rowNum) -> rs.getInt("quantity")).stream().findFirst().orElse(null);
 
-        if (productExists) {
+        if (existingQuantity != null) {
             // If product exists, update the quantity
-            String updateQuantitySql = "UPDATE order_product SET quantity = quantity + ? WHERE order_id = ? AND product_id = ?";
-            jdbcTemplate.update(updateQuantitySql, quantity, orderId, productId);
+            String updateQuantitySql = "UPDATE order_product SET quantity = ? WHERE order_id = ? AND product_id = ?";
+            jdbcTemplate.update(updateQuantitySql, existingQuantity + quantity, orderId, productId);
         } else {
             // Otherwise, add a new entry
             String insertProductSql = "INSERT INTO order_product (order_id, product_id, quantity) VALUES (?, ?, ?)";
@@ -94,6 +95,30 @@ public class OrderRepositoryImpl implements OrderRepository {
         jdbcTemplate.update(updateNumProductsSql, numProducts, orderId);
     }
 
+    @Override
+    @Transactional
+    public Order updateOrderProduct(Long orderId, Long productId, int quantity) {
+        // Check if the product exists in the order
+        String checkExistenceSql = "SELECT quantity FROM order_product WHERE order_id = ? AND product_id = ?";
+        Integer currentQuantity = jdbcTemplate.query(checkExistenceSql, new Object[]{orderId, productId},
+                (rs, rowNum) -> rs.getInt("quantity")).stream().findFirst().orElse(null);
+
+        if (currentQuantity != null) {
+            // Update the quantity of the product in the order
+            String updateQuantitySql = "UPDATE order_product SET quantity = ? WHERE order_id = ? AND product_id = ?";
+            jdbcTemplate.update(updateQuantitySql, quantity, orderId, productId);
+
+            // Update order's final price
+            updateOrderFinalPrice(orderId);
+
+            // Update numProducts for the order
+            updateNumProducts(orderId);
+        } else {
+            throw new ResourceNotFoundException("Product not found with id " + productId + " in order " + orderId);
+        }
+
+        return getOrderById(orderId);
+    }
 
     @Override
     @Transactional

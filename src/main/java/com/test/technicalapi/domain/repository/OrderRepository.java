@@ -28,4 +28,6 @@ public interface OrderRepository {
     List<Order> getAllOrders();
 
     Order getOrderById(Long orderId);
+
+    Order updateOrderProduct(Long orderId, Long productId, int quantity);
 }

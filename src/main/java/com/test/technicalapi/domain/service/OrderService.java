@@ -24,4 +24,6 @@ public interface OrderService {
     List<Order> getAllOrders();
 
     Order getOrderById(Long orderId);
+
+    Order updateProductQuantity(Long orderId, Long productId, int quantity);
 }

@@ -58,4 +58,9 @@ public class OrderServiceImpl implements OrderService {
     public Order getOrderById(Long orderId) {
         return orderRepository.getOrderById(orderId);
     }
+
+    @Override
+    public Order updateProductQuantity(Long orderId, Long productId, int quantity) {
+        return orderRepository.updateOrderProduct(orderId, productId, quantity);
+    }
 }
