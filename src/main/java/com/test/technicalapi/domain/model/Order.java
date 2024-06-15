@@ -17,6 +17,16 @@ public class Order extends AuditModel{
 
     private List<Product> products;
 
+    private int numProducts;
+
+    public int getNumProducts() {
+        return numProducts;
+    }
+
+    public void setNumProducts(int numProducts) {
+        this.numProducts = numProducts;
+    }
+
     public void updateFinalPrice() {
         double totalPrice = 0.0;
         if (products != null) {

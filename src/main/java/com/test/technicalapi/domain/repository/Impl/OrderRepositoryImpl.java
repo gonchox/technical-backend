@@ -78,8 +78,22 @@ public class OrderRepositoryImpl implements OrderRepository {
         // Update order's final price
         updateOrderFinalPrice(orderId);
 
+        // Update numProducts for the order
+        updateNumProducts(orderId);
+
         return getOrderById(orderId);
     }
+
+    private void updateNumProducts(Long orderId) {
+        // Calculate numProducts
+        String countProductsSql = "SELECT COALESCE(SUM(quantity), 0) AS numProducts FROM order_product WHERE order_id = ?";
+        Integer numProducts = jdbcTemplate.queryForObject(countProductsSql, Integer.class, orderId);
+
+        // Update numProducts in the orders table
+        String updateNumProductsSql = "UPDATE orders SET numProducts = ? WHERE id = ?";
+        jdbcTemplate.update(updateNumProductsSql, numProducts, orderId);
+    }
+
 
     @Override
     @Transactional
@@ -103,10 +117,14 @@ public class OrderRepositoryImpl implements OrderRepository {
 
             // Update order's final price
             updateOrderFinalPrice(orderId);
+
+            // Update numProducts for the order
+            updateNumProducts(orderId);
         }
 
         return getOrderById(orderId);
     }
+
 
     private void updateOrderFinalPrice(Long orderId) {
         String sql = "SELECT SUM(p.unitPrice * op.quantity) FROM products p " +

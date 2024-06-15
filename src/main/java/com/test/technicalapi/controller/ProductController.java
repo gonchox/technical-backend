@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 @Tag(name = "products", description = "Products API")
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "*")
 public class ProductController {
     @Autowired
     private ModelMapper mapper;

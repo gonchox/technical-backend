@@ -15,6 +15,7 @@ public class OrderResource extends AuditModel {
     private Long id;
     private String orderNumber;
     private double finalPrice;
+    private int numProducts;
     @JsonManagedReference
     @JsonIgnore
     private List<Product> products;
