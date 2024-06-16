@@ -18,8 +18,6 @@ public abstract class AuditModel implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
-    // Constructors, getters, and setters
-
     public AuditModel() {
         this.date = new Date();
     }

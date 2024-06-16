@@ -64,10 +64,8 @@ public class ProductRepositoryImpl implements ProductRepository {
         String sql = "INSERT INTO products (name, unitPrice) VALUES (?, ?)";
         jdbcTemplate.update(sql, product.getName(), product.getUnitPrice());
 
-        // Retrieve the created product's id
         Long productId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
 
-        // Return the created product
         return findProductById(productId);
     }
 

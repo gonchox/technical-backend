@@ -52,9 +52,6 @@ public class OrderRepositoryImpl implements OrderRepository {
         Long orderId = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Long.class);
         order.setId(orderId);
 
-        // Optionally, you can associate products with the order if needed
-        // Example: insertProductsForOrder(orderId, order.getProducts());
-
         return order;
     }
 
@@ -76,12 +73,8 @@ public class OrderRepositoryImpl implements OrderRepository {
             jdbcTemplate.update(insertProductSql, orderId, productId, quantity);
         }
 
-        // Update order's final price
         updateOrderFinalPrice(orderId);
-
-        // Update numProducts for the order
         updateNumProducts(orderId);
-
         return getOrderById(orderId);
     }
 
@@ -108,10 +101,7 @@ public class OrderRepositoryImpl implements OrderRepository {
             String updateQuantitySql = "UPDATE order_product SET quantity = ? WHERE order_id = ? AND product_id = ?";
             jdbcTemplate.update(updateQuantitySql, quantity, orderId, productId);
 
-            // Update order's final price
             updateOrderFinalPrice(orderId);
-
-            // Update numProducts for the order
             updateNumProducts(orderId);
         } else {
             throw new ResourceNotFoundException("Product not found with id " + productId + " in order " + orderId);
@@ -140,10 +130,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 jdbcTemplate.update(deleteProductSql, orderId, productId);
             }
 
-            // Update order's final price
             updateOrderFinalPrice(orderId);
-
-            // Update numProducts for the order
             updateNumProducts(orderId);
         }
 
@@ -177,7 +164,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         return jdbcTemplate.queryForObject(sql, new Object[]{orderId}, new BeanPropertyRowMapper<>(Order.class));
     }
 
-    // Helper method to insert products for an order (if needed)
+    // Helper method to insert products for an order
     private void insertProductsForOrder(Long orderId, List<Product> products) {
         for (Product product : products) {
             String insertProductSql = "INSERT INTO order_product (order_id, product_id) VALUES (?, ?)";
